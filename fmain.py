@@ -43,8 +43,8 @@ def find_max_min():
             if float(item[attr]) >= MAX[attr]:
                 MAX[attr] = item[attr]
 
-    print('\n-------> MIN: ' + str(MIN))
-    print('\n-------> MAX: ' + str(MAX))
+    # print('\n-------> MIN: ' + str(MIN))
+    # print('\n-------> MAX: ' + str(MAX))
     return (MAX, MIN)
 
 
@@ -56,14 +56,14 @@ def get_likelihood_function(MAX, MIN):
 
     for attr in attrs:
         Z[attr] = MAX[attr] - MIN[attr]
-        LOW[attr] = [MIN[attr] + Z[attr] / 6, MIN[attr] + 5 * Z[attr] / 6]
+        LOW[attr] = [MIN[attr], MIN[attr] + Z[attr] / 3]
         MED[attr] = [MIN[attr] + Z[attr] / 6, MIN[attr] + 5 * Z[attr] / 6]
         HIG[attr] = [MIN[attr] + 2 * Z[attr] / 3, MIN[attr] + Z[attr]]
 
-    print('\n-------> Z: ' + str(Z))
-    print('\n-------> LOW: ' + str(LOW))
-    print('\n-------> MED: ' + str(MED))
-    print('\n-------> HIG: ' + str(HIG))
+    # print('\n-------> Z: ' + str(Z))
+    # print('\n-------> LOW: ' + str(LOW))
+    # print('\n-------> MED: ' + str(MED))
+    # print('\n-------> HIG: ' + str(HIG))
 
     return (Z, LOW, MED, HIG)
 
@@ -153,16 +153,43 @@ def generate_fuzzy_rules(MIN, Z):
                     RULES[_k][1] = item['class']
 
     RULES = collections.OrderedDict(sorted(RULES.items()))
-    print('\n -------> FILTER RULES: {}\n'.format(len(RULES)))
-    for k, v in RULES.items():
-        print(k, v)
+    # print('\n -------> FILTER RULES: {}\n'.format(len(RULES)))
+    # for k, v in RULES.items():
+    #     print(k, v)
+    return RULES
+
+
+def firing_rules(LOW, MED, HIG):
+    FIRED = []
+    for i in test_dataset:
+        tmp = {}
+        for k, v in i.items():
+            if k == 'seq_name' or k == 'class':
+                continue
+            if LOW[k][0] <= v and LOW[k][1] >= v:
+                tmp[k] = 'LOW'
+            if MED[k][0] <= v and MED[k][1] >= v:
+                tmp[k] = 'MED'
+            if HIG[k][0] <= v and HIG[k][1] >= v:
+                tmp[k] = 'HIG'
+        FIRED.append(tmp)
+        del(tmp)
+    # for i in FIRED:
+    #     print(i)
+    return FIRED
 
 
 def main():
     get_data()
     MAX, MIN = find_max_min()
     Z, LOW, MED, HIG = get_likelihood_function(MAX, MIN)
-    generate_fuzzy_rules(MIN, Z)
+    RULES = generate_fuzzy_rules(MIN, Z)
+    FIRED = []
+    for i in firing_rules(LOW, MED, HIG):
+        tmp = i.values()
+        if tmp in RULES.keys():
+            FIRED.append('+'.join(tmp))
+    print(FIRED)
 
 
 if __name__ == '__main__':
