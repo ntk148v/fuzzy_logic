@@ -172,7 +172,7 @@ def firing_rules(LOW, MED, HIG):
                 tmp[k] = 'MED'
             if HIG[k][0] <= v and HIG[k][1] >= v:
                 tmp[k] = 'HIG'
-        FIRED.append(tmp)
+        FIRED.append(collections.OrderedDict(sorted(tmp.items())))
         del(tmp)
     # for i in FIRED:
     #     print(i)
@@ -184,12 +184,17 @@ def main():
     MAX, MIN = find_max_min()
     Z, LOW, MED, HIG = get_likelihood_function(MAX, MIN)
     RULES = generate_fuzzy_rules(MIN, Z)
-    FIRED = []
-    for i in firing_rules(LOW, MED, HIG):
-        tmp = i.values()
-        if tmp in RULES.keys():
-            FIRED.append('+'.join(tmp))
-    print(FIRED)
+    # FIRED = []
+    # for i in firing_rules(LOW, MED, HIG):
+    #     tmp = i.values()
+    #     if tmp in RULES.keys():
+    #         FIRED.append('+'.join(tmp))
+    # print(FIRED)
+    # for i in firing_rules(LOW, MED, HIG):
+    #     print('+'.join(i.values()))
+    # print('------------------------------')
+    # for i in RULES.keys():
+    #     print(i)
 
 
 if __name__ == '__main__':
