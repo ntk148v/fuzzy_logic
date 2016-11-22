@@ -84,9 +84,13 @@ def gen_fuzzy_rules(MIN, Z, dataset):
                     temp['LOW'] = (3 * MIN[k] + Z[k] - 3 * v) / Z[k]
                 else:
                     for _k, _v in rule.items():
-                        new_k = _k + '+LOW'
-                        temp[new_k] = (
-                            3 * MIN[k] + Z[k] - 3 * v) / Z[k] * temp[_k]
+                        m = temp[_k]
+                        new_k = _k + '+LOW'                       
+                        if ((3 * MIN[k] + Z[k] - 3 * v) / Z[k]) >= m:
+                            temp[new_k] = m
+                        else: temp[new_k] = (3 * MIN[k] + Z[k] - 3 * v) / Z[k]                      
+                        #temp[new_k] = (
+                        #    3 * MIN[k] + Z[k] - 3 * v) / Z[k] * temp[_k]
                         del temp[_k]
             elif MIN[k] + Z[k] / 6 < v and v < MIN[k] + Z[k] / 3:
                 if len(rule) == 0:
@@ -94,12 +98,23 @@ def gen_fuzzy_rules(MIN, Z, dataset):
                     temp['MED'] = (6 * v - 6 * MIN[k] - Z[k]) / (2 * Z[k])
                 else:
                     for _k, _v in rule.items():
+                        m = temp[_k]
                         new_k = _k + '+LOW'
                         new_k_2 = _k + '+MED'
-                        temp[new_k] = (
-                            3 * MIN[k] + Z[k] - 3 * v) / Z[k] * temp[_k]
-                        temp[new_k_2] = (3 * MIN[k] + Z[k] -
-                                         3 * v) / Z[k] * temp[_k]
+                        if ((3 * MIN[k] + Z[k] - 3 * v) / Z[k]) >= m:
+                            temp[new_k] = m
+                        else:
+                            temp[new_k] = (3 * MIN[k] + Z[k] - 3 * v) / Z[k]
+
+                        if ((6 * v - 6 * MIN[k] - Z[k]) / (2 * Z[k])) >= m:
+                            temp[new_k_2] = m
+                        else:
+                            temp[new_k_2] = (6 * v - 6 * MIN[k] - Z[k]) / (2 * Z[k])
+                        
+                        #temp[new_k] = (
+                        #    3 * MIN[k] + Z[k] - 3 * v) / Z[k] * temp[_k]
+                        #temp[new_k_2] = (3 * MIN[k] + Z[k] -
+                        #                 3 * v) / Z[k] * temp[_k]
                         del temp[_k]
             elif MIN[k] + Z[k] / 3 < v and v < MIN[k] + 2 * Z[k] / 3:
                 if len(rule) == 0:
@@ -110,13 +125,24 @@ def gen_fuzzy_rules(MIN, Z, dataset):
                             6 * MIN[k] + 5 * Z[k] - 6 * v) / (2 * Z[k])
                 else:
                     for _k, _v in rule.items():
+                        m = temp[_k]
                         new_k = _k + '+MED'
                         if v < MIN[k] + Z[k] / 2:
-                            temp[new_k] = (6 * v - 6 * MIN[k] - Z[k]
-                                           ) / (2 * Z[k]) * temp[_k]
+                            if ((6 * v - 6 * MIN[k] - Z[k]) / (2 * Z[k])) >= m:
+                                temp[new_k] = m
+                            else:
+                                temp[new_k] = (6 * v - 6 * MIN[k] - Z[k]
+                                            ) / (2 * Z[k])
+                            #temp[new_k] = (6 * v - 6 * MIN[k] - Z[k]
+                            #               ) / (2 * Z[k]) * temp[_k]
                         else:
-                            temp[new_k] = (6 * MIN[k] + 5 * Z[k] -
-                                           6 * v) / (2 * Z[k]) * temp[_k]
+                            if ((6 * MIN[k] + 5 * Z[k] - 6 * v) / (2 * Z[k])) >= m:
+                                temp[new_k] = m
+                            else:
+                                temp[new_k] = (6 * MIN[k] + 5 * Z[k] -
+                                            6 * v) / (2 * Z[k])
+                            #temp[new_k] = (6 * MIN[k] + 5 * Z[k] -
+                            #               6 * v) / (2 * Z[k]) * temp[_k]
                         del temp[_k]
             elif MIN[k] + 2 * Z[k] / 3 < v and v < MIN[k] + 5 * Z[k] / 6:
                 if len(rule) == 0:
@@ -124,23 +150,39 @@ def gen_fuzzy_rules(MIN, Z, dataset):
                     temp['HIG'] = (3 * v - 3 * MIN[k] - 2 * Z[k]) / Z[k]
                 else:
                     for _k, _v in rule.items():
+                        m = temp[_k]
                         new_k = _k + '+MED'
                         new_k_2 = _k + '+HIG'
-                        temp[new_k] = (6 * MIN[k] + 5 * Z[k] - 6 *
-                                       v) / (2 * Z[k]) * temp[_k]
-                        temp[new_k_2] = (3 * v - 3 * MIN[k] -
-                                         2 * Z[k]) / Z[k] * temp[_k]
+                        if ((6 * MIN[k] + 5 * Z[k] - 6 * v) / (2 * Z[k])) >= m:
+                            temp[new_k] = m
+                        else:
+                            temp[new_k] = (6 * MIN[k] + 5 * Z[k] - 6 * v) / (2 * Z[k])
+
+                        if ((3 * v - 3 * MIN[k] - 2 * Z[k]) / Z[k]) >= m:
+                            temp[new_k_2] = m
+                        else:
+                            temp[new_k_2] = (3 * v - 3 * MIN[k] - 2 * Z[k]) / Z[k]
+                        #temp[new_k] = (6 * MIN[k] + 5 * Z[k] - 6 *
+                        #               v) / (2 * Z[k]) * temp[_k]
+                        #temp[new_k_2] = (3 * v - 3 * MIN[k] -
+                        #                 2 * Z[k]) / Z[k] * temp[_k]
                         del temp[_k]
             else:
                 if len(rule) == 0:
                     temp['HIG'] = (3 * v - 3 * MIN[k] - 2 * Z[k]) / Z[k]
                 else:
                     for _k, _v in rule.items():
+                        m = temp[_k]
                         new_k = _k + '+HIG'
-                        temp[new_k] = (3 * v - 3 * MIN[k] - 2 *
-                                       Z[k]) / Z[k] * temp[_k]
+                        if ((3 * v - 3 * MIN[k] - 2 * Z[k]) / Z[k]) >= m:
+                            temp[new_k] = m
+                        else:
+                            temp[new_k] = (3 * v - 3 * MIN[k] - 2 * Z[k]) / Z[k]
+                        #temp[new_k] = (3 * v - 3 * MIN[k] - 2 *
+                        #               Z[k]) / Z[k] * temp[_k]
                         del temp[_k]
             rule = temp.copy()
+            print rule.items()
 
         if dataset == train_dataset:
             for _k, _v in rule.items():
