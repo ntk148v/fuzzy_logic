@@ -32,9 +32,10 @@ def get_data():
 def find_max_min():
     MAX = {}
     MIN = {}
+    dataset = train_dataset + test_dataset
     for attr in attrs:
-        MIN[attr] = train_dataset[0][attr]
-        MAX[attr] = train_dataset[0][attr]
+        MIN[attr] = dataset[0][attr]
+        MAX[attr] = dataset[0][attr]
 
     for item in train_dataset:
         for attr in attrs:
@@ -68,11 +69,10 @@ def get_likelihood_function(MAX, MIN):
     return (Z, LOW, MED, HIG)
 
 
-def generate_fuzzy_rules(MIN, Z):
+def gen_fuzzy_rules(MIN, Z, dataset):
     RULES = dict()
-    train_dataset_fuzzy_degree = list()
-
-    for item in train_dataset:
+    FIRED_RULES = list()
+    for item in dataset:
         rule = dict()
         temp = dict()
         for k, v in item.items():
@@ -142,59 +142,47 @@ def generate_fuzzy_rules(MIN, Z):
                         del temp[_k]
             rule = temp.copy()
 
-        for _k, _v in rule.items():
-            if _v <= 0:
-                continue
-            if _k not in RULES:
-                RULES[_k] = [_v, item['class']]
-            else:
-                if RULES[_k][0] < _v:
-                    RULES[_k][0] = _v
-                    RULES[_k][1] = item['class']
-
-    RULES = collections.OrderedDict(sorted(RULES.items()))
-    # print('\n -------> FILTER RULES: {}\n'.format(len(RULES)))
-    # for k, v in RULES.items():
-    #     print(k, v)
-    return RULES
-
-
-def firing_rules(LOW, MED, HIG):
-    FIRED = []
-    for i in test_dataset:
-        tmp = {}
-        for k, v in i.items():
-            if k == 'seq_name' or k == 'class':
-                continue
-            if LOW[k][0] <= v and LOW[k][1] >= v:
-                tmp[k] = 'LOW'
-            if MED[k][0] <= v and MED[k][1] >= v:
-                tmp[k] = 'MED'
-            if HIG[k][0] <= v and HIG[k][1] >= v:
-                tmp[k] = 'HIG'
-        FIRED.append(collections.OrderedDict(sorted(tmp.items())))
-        del(tmp)
-    # for i in FIRED:
-    #     print(i)
-    return FIRED
+        if dataset == train_dataset:
+            for _k, _v in rule.items():
+                if _v <= 0:
+                    continue
+                if _k not in RULES:
+                    RULES[_k] = [_v, item['class']]
+                else:
+                    if RULES[_k][0] < _v:
+                        RULES[_k][0] = _v
+                        RULES[_k][1] = item['class']
+        else:
+            max_v = 0
+            max_k = ''
+            for _k, _v in rule.items():
+                if _v > max_v:
+                    max_v = _v
+                    max_k = _k
+            FIRED_RULES.append({max_k: max_v, 'class': item['class']})
+    if dataset == train_dataset:
+        RULES = collections.OrderedDict(sorted(RULES.items()))
+        print('\n -------> FILTER RULES: {}\n'.format(len(RULES)))
+        return RULES
+    else:
+        print('\n -------> FILTER FIRED SHIT RULES: {}\n'.format(len(FIRED_RULES)))
+        return FIRED_RULES
 
 
 def main():
     get_data()
     MAX, MIN = find_max_min()
     Z, LOW, MED, HIG = get_likelihood_function(MAX, MIN)
-    RULES = generate_fuzzy_rules(MIN, Z)
-    # FIRED = []
-    # for i in firing_rules(LOW, MED, HIG):
-    #     tmp = i.values()
-    #     if tmp in RULES.keys():
-    #         FIRED.append('+'.join(tmp))
-    # print(FIRED)
-    # for i in firing_rules(LOW, MED, HIG):
-    #     print('+'.join(i.values()))
-    # print('------------------------------')
-    # for i in RULES.keys():
-    #     print(i)
+    RULES = gen_fuzzy_rules(MIN, Z, train_dataset)
+    FIRED_RULES = gen_fuzzy_rules(MIN, Z, test_dataset)
+    TMP = []
+    for e in FIRED_RULES:
+        for _k in e.keys():
+            if _k == 'class' or _k in TMP:
+                continue
+            if _k in RULES.keys():
+                TMP.append(_k)
+                print(sorted(e.items()))
 
 
 if __name__ == '__main__':
